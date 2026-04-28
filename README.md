@@ -3,6 +3,34 @@
 Techlabs 서비스 점검 / 버전체크 / 공지 라이브러리의 Flutter 브릿지.
 Android(Kotlin) 및 iOS(Swift) 네이티브 라이브러리를 MethodChannel로 연결한다.
 
+## 요구사항
+
+- Flutter 3.24 이상 (iOS Swift Package Manager 통합 사용)
+- Android: minSdk 24
+- iOS: 15.0 이상
+
+## 의존성 설정 (호스트 앱 측)
+
+### Android
+
+호스트 앱의 `android/settings.gradle` 또는 `android/build.gradle`의 `allprojects.repositories`에 **JitPack 추가**:
+
+```gradle
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://www.jitpack.io' }
+    }
+}
+```
+
+> Gradle 7.x 이상에서 `PREFER_SETTINGS` 모드를 사용하는 경우, 라이브러리 수준의 repository 선언이 무시될 수 있으므로 반드시 호스트 앱의 `settings.gradle`에 JitPack을 추가해야 한다.
+
+### iOS
+
+Flutter 3.24+의 Swift Package Manager 통합을 사용한다. 별도 설정 불필요. (CocoaPods 단독 모드는 미지원)
+
 ## 지원 플랫폼
 
 | Platform | 최소 버전 |

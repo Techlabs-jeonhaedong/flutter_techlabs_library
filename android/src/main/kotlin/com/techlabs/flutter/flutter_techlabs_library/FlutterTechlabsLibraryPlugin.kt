@@ -1,9 +1,9 @@
 package com.techlabs.flutter.flutter_techlabs_library
 
-import com.techlabs.flutter.flutter_techlabs_library.lib.ServerEnvironment
-import com.techlabs.flutter.flutter_techlabs_library.lib.TechLabsLibrary
-import com.techlabs.flutter.flutter_techlabs_library.lib.model.NoticeCheckResult
-import com.techlabs.flutter.flutter_techlabs_library.lib.model.VersionCheckResult
+import com.techlabs.androidlib.ServerEnvironment
+import com.techlabs.androidlib.TechLabsLibrary
+import com.techlabs.androidlib.model.NoticeCheckResult
+import com.techlabs.androidlib.model.VersionCheckResult
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -108,7 +108,7 @@ class FlutterTechlabsLibraryPlugin : FlutterPlugin, MethodCallHandler {
         }
     }
 
-    private fun serviceInfoToMap(info: com.techlabs.flutter.flutter_techlabs_library.lib.model.ServiceInfo): Map<String, Any?> {
+    private fun serviceInfoToMap(info: com.techlabs.androidlib.model.ServiceInfo): Map<String, Any?> {
         return mapOf(
             "domain" to info.domain,
             "maintenance" to info.maintenance,

@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import ios_techlabs_library
 
 public class FlutterTechlabsLibraryPlugin: NSObject, FlutterPlugin {
 

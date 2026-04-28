@@ -1,3 +1,10 @@
+## 0.2.0 - 2026-04-28
+### Changed
+- 네이티브 라이브러리를 패키지 내부 복사본 → 표준 의존성으로 전환
+  - Android: JitPack via `com.github.thyadang-techlabs:android-techlabs-library:v2.1.1`
+  - iOS: Swift Package Manager via `iOS-techlabs-library 1.0.0`
+- iOS는 Flutter 3.24+ 요구 (SwiftPM 통합 사용)
+
 ## 0.1.1
 
 - [fix] iOS `resolveResult` unknown type 시 `.forceUpdate` → `.error` 반환으로 Android와 동일하게 수정.
