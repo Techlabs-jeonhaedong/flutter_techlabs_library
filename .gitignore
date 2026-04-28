@@ -1,0 +1,30 @@
+# Dart / Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+*.iml
+*.ipr
+*.iws
+.idea/
+.DS_Store
+
+# Android
+android/.gradle/
+android/local.properties
+android/captures/
+android/key.properties
+**/GeneratedPluginRegistrant.java
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+**/*.xcworkspace
+!**/*.xcodeproj/*.xcworkspace
+!/usingcocoaforsafari.xcworkspace
+
+# pubspec.lock (라이브러리 패키지는 lock 제외 권장)
+pubspec.lock
