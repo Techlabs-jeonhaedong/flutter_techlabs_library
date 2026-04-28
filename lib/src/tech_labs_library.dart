@@ -38,8 +38,13 @@ class TechLabsLibrary {
     String? currentVersion,
     int? currentBuildNumber,
   }) async {
+    if (info == null) return const VersionCheckError();
+    if (currentVersion == null && currentBuildNumber == null) {
+      assert(false, 'checkVersion: currentVersion 또는 currentBuildNumber 중 하나는 필수');
+      return const VersionCheckError();
+    }
     final result = await _platform.checkVersion(
-      info: info?.toMap(),
+      info: info.toMap(),
       currentVersion: currentVersion,
       currentBuildNumber: currentBuildNumber,
     );
@@ -50,8 +55,9 @@ class TechLabsLibrary {
     NoticeCheckInfo? info,
     required int lastSeenIndex,
   }) async {
+    if (info == null) return const NoticeCheckError();
     final result = await _platform.checkNotice(
-      info: info?.toMap(),
+      info: info.toMap(),
       lastSeenIndex: lastSeenIndex,
     );
     return _parseNoticeCheckResult(result);
@@ -85,7 +91,10 @@ class TechLabsLibrary {
         return OptionalUpdate(storePackage);
       case 'noUpdateNeeded':
         return const NoUpdateNeeded();
+      case 'error':
+        return const VersionCheckError();
       default:
+        assert(false, 'Unknown VersionCheckResult: $resultStr');
         return const VersionCheckError();
     }
   }
@@ -98,7 +107,10 @@ class TechLabsLibrary {
         return HasNewNotice(latestIndex ?? 0);
       case 'noNewNotice':
         return const NoNewNotice();
+      case 'error':
+        return const NoticeCheckError();
       default:
+        assert(false, 'Unknown NoticeCheckResult: $resultStr');
         return const NoticeCheckError();
     }
   }

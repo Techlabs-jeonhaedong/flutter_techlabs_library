@@ -91,14 +91,13 @@ final class TechLabsLibrary {
 
     private func resolveResult(isUpdateRequired: Bool, info: VersionCheckInfo) -> VersionCheckResult {
         guard isUpdateRequired else { return .noUpdateNeeded }
-        let type = info.type.isEmpty ? Self.updateTypeForce : info.type
-        switch type {
+        switch info.type {
         case Self.updateTypeForce:
             return .forceUpdate(storePackage: info.appName2)
         case Self.updateTypeOptional:
             return .optionalUpdate(storePackage: info.appName2)
         default:
-            return .forceUpdate(storePackage: info.appName2)
+            return .error
         }
     }
 

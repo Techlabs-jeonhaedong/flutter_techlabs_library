@@ -3,13 +3,26 @@ import UIKit
 
 public class FlutterTechlabsLibraryPlugin: NSObject, FlutterPlugin {
 
+    private var methodChannel: FlutterMethodChannel?
+    private var inflightTasks: [AnyObject] = []
+
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(
             name: "com.techlabs.flutter/library",
             binaryMessenger: registrar.messenger()
         )
         let instance = FlutterTechlabsLibraryPlugin()
+        instance.methodChannel = channel
         registrar.addMethodCallDelegate(instance, channel: channel)
+    }
+
+    public func detachFromEngine(for registrar: FlutterPluginRegistrar) {
+        for t in inflightTasks {
+            (t as? Task<Void, Never>)?.cancel()
+        }
+        inflightTasks.removeAll()
+        methodChannel?.setMethodCallHandler(nil)
+        methodChannel = nil
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -41,23 +54,30 @@ public class FlutterTechlabsLibraryPlugin: NSObject, FlutterPlugin {
         let envStr = args["environment"] as? String ?? "production"
         let environment: ServerEnvironment = envStr == "development" ? .development : .production
         TechLabsLibrary.shared.configure(appIdentifier: appId, environment: environment)
+        if TechLabsLibrary.shared.appIdentifier == nil {
+            result(FlutterError(code: "INVALID_APP_ID", message: "Invalid appId: \(appId)", details: nil))
+            return
+        }
         result(nil)
     }
 
     private func handleFetchServiceInfo(result: @escaping FlutterResult) {
         if #available(iOS 15.0, *) {
-            Task {
+            let task: Task<Void, Never> = Task {
                 do {
                     let info = try await TechLabsLibrary.shared.fetchServiceInfo()
+                    guard !Task.isCancelled else { return }
                     await MainActor.run {
                         result(self.serviceInfoToMap(info))
                     }
                 } catch {
+                    guard !Task.isCancelled else { return }
                     await MainActor.run {
-                        result(FlutterError(code: "FETCH_ERROR", message: error.localizedDescription, details: nil))
+                        result(FlutterError(code: "FETCH_ERROR", message: "Service info fetch failed", details: nil))
                     }
                 }
             }
+            inflightTasks.append(task)
         } else {
             result(FlutterError(code: "UNSUPPORTED", message: "iOS 15.0+ required", details: nil))
         }
@@ -68,14 +88,43 @@ public class FlutterTechlabsLibraryPlugin: NSObject, FlutterPlugin {
             result(FlutterError(code: "INVALID_ARGUMENT", message: "arguments required", details: nil))
             return
         }
-        let infoDict = args["info"] as? [String: Any]
-        let currentVersion = args["currentVersion"] as? String ?? ""
+        guard let infoDict = args["info"] as? [String: Any] else {
+            result(versionCheckResultToMap(.error))
+            return
+        }
+        let info = VersionCheckInfo(dictionary: infoDict)
+        let currentBuildNumber = (args["currentBuildNumber"] as? NSNumber)?.intValue
+        let currentVersion = args["currentVersion"] as? String
 
-        let versionResult = TechLabsLibrary.shared.checkVersion(
-            dictionary: infoDict,
-            currentVersion: currentVersion
-        )
+        if let buildNum = currentBuildNumber {
+            guard !info.ver.isEmpty else {
+                result(versionCheckResultToMap(.noUpdateNeeded))
+                return
+            }
+            guard let serverBuild = Int(info.ver) else {
+                result(versionCheckResultToMap(.noUpdateNeeded))
+                return
+            }
+            let needs = serverBuild > buildNum
+            result(versionCheckResultToMap(resolveResultLocal(isUpdateRequired: needs, info: info)))
+            return
+        }
+
+        guard let currentVersion = currentVersion else {
+            result(versionCheckResultToMap(.error))
+            return
+        }
+        let versionResult = TechLabsLibrary.shared.checkVersion(info: info, currentVersion: currentVersion)
         result(versionCheckResultToMap(versionResult))
+    }
+
+    private func resolveResultLocal(isUpdateRequired: Bool, info: VersionCheckInfo) -> VersionCheckResult {
+        guard isUpdateRequired else { return .noUpdateNeeded }
+        switch info.type {
+        case "0": return .forceUpdate(storePackage: info.appName2)
+        case "1": return .optionalUpdate(storePackage: info.appName2)
+        default: return .error
+        }
     }
 
     private func handleCheckNotice(call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -83,7 +132,10 @@ public class FlutterTechlabsLibraryPlugin: NSObject, FlutterPlugin {
             result(FlutterError(code: "INVALID_ARGUMENT", message: "arguments required", details: nil))
             return
         }
-        let infoDict = args["info"] as? [String: Any]
+        guard let infoDict = args["info"] as? [String: Any] else {
+            result(noticeCheckResultToMap(.error))
+            return
+        }
         let lastSeenIndex = args["lastSeenIndex"] as? Int ?? 0
 
         let noticeResult = TechLabsLibrary.shared.checkNotice(

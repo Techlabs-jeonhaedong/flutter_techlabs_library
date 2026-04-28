@@ -91,3 +91,24 @@ await TechLabsLibrary.instance.clearCache();
 | appId | DEV URL | PROD URL |
 |---|---|---|
 | `techlabs.global.yeppo` | https://status.yeppo.net/dev-yeppo-service.json | https://status.yeppo.net/www-yeppo-service.json |
+
+## Android 보안 설정
+
+이 라이브러리는 `yeppo.net`에 대한 HTTPS 통신만 허용하는 `network_security_config.xml` 파일을 포함한다.
+호스트 앱의 `AndroidManifest.xml` `<application>` 태그에 아래와 같이 적용하면 평문 HTTP 트래픽을 차단할 수 있다.
+
+```xml
+<application
+    android:networkSecurityConfig="@xml/network_security_config"
+    ... >
+```
+
+> 호스트 앱에 이미 자체 `networkSecurityConfig`가 있는 경우, 해당 파일에 `yeppo.net` 도메인 설정을 직접 병합하거나
+> `tools:replace="android:networkSecurityConfig"`를 사용해 충돌을 해결할 것.
+
+## configure 호출 정책
+
+- 앱 시작 직후, 임의의 API 호출 전에 반드시 `configure`를 호출해야 한다.
+- 유효하지 않은 `appId`를 전달하면 `PlatformException(INVALID_APP_ID)` 예외가 발생한다 (iOS).
+- 멀티 엔진(multi-engine) 환경에서는 엔진마다 플러그인 인스턴스가 독립적으로 생성된다.
+  단, `TechLabsLibrary`는 싱글톤이므로 마지막 `configure` 호출이 전역 상태를 덮어쓴다. 주의할 것.

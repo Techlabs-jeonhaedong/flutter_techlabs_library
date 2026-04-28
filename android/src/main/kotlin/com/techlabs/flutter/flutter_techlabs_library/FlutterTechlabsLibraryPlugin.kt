@@ -54,9 +54,11 @@ class FlutterTechlabsLibraryPlugin : FlutterPlugin, MethodCallHandler {
                 scope.launch {
                     try {
                         val info = TechLabsLibrary.fetchServiceInfoSuspend()
-                        result.success(serviceInfoToMap(info))
+                        if (isActive) result.success(serviceInfoToMap(info))
+                    } catch (e: kotlinx.coroutines.CancellationException) {
+                        throw e
                     } catch (e: Exception) {
-                        result.error("FETCH_ERROR", e.message, null)
+                        if (isActive) result.error("FETCH_ERROR", e.message, null)
                     }
                 }
             }

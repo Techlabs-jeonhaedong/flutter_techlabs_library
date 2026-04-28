@@ -148,7 +148,7 @@ object TechLabsLibrary {
         try {
             val responseCode = connection.responseCode
             if (responseCode != HttpURLConnection.HTTP_OK) {
-                throw IOException("HTTP $responseCode: ${connection.responseMessage}")
+                throw IOException("Failed to fetch service info (HTTP $responseCode)")
             }
             return connection.inputStream.bufferedReader().use { it.readText() }
         } finally {

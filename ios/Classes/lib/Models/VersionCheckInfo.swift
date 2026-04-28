@@ -24,7 +24,7 @@ struct VersionCheckInfo: Decodable {
     init(dictionary: [String: Any]) {
         self.ver = (dictionary["ver"] as? String) ?? ""
         self.latestVer = (dictionary["latest_ver"] as? String) ?? ""
-        self.type = (dictionary["type"] as? String) ?? "0"
+        self.type = (dictionary["type"] as? String) ?? ""
         self.appName2 = (dictionary["app_name2"] as? String) ?? ""
     }
 
@@ -32,7 +32,7 @@ struct VersionCheckInfo: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.ver = (try? container.decode(String.self, forKey: .ver)) ?? ""
         self.latestVer = (try? container.decode(String.self, forKey: .latestVer)) ?? ""
-        self.type = (try? container.decode(String.self, forKey: .type)) ?? "0"
+        self.type = (try? container.decode(String.self, forKey: .type)) ?? ""
         self.appName2 = (try? container.decode(String.self, forKey: .appName2)) ?? ""
     }
 }
